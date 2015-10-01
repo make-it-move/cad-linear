@@ -1,0 +1,18 @@
+from PySide import QtCore
+
+movement = 0
+direction = 1
+
+def MOVE():
+	global movement
+	global direction
+	FreeCAD.getDocument("block_combined").getObject("Pad001").Placement = App.Placement(App.Vector(0,0,movement),App.Rotation(App.Vector(0,0,1),0))
+	if movement >= 500:
+		direction = -1
+	elif movement<=0:
+		direction = 1
+	movement = movement + 1 * direction
+
+timer = QtCore.QTimer()
+timer.timeout.connect(MOVE)
+timer.start(1)
