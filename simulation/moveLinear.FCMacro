@@ -1,18 +1,61 @@
 from PySide import QtCore
+import time
+import serial
 
-movement = 0
-direction = 1
+# configure the serial connections (the parameters differs on the device you are connecting to)
+ser = serial.Serial(
+    port='/dev/cu.usbmodem1411',
+    baudrate=9600,
+    parity=serial.PARITY_ODD,
+    stopbits=serial.STOPBITS_TWO,
+    bytesize=serial.SEVENBITS
+)
 
-def MOVE():
-	global movement
-	global direction
-	FreeCAD.getDocument("block_combined").getObject("Pad001").Placement = App.Placement(App.Vector(0,0,movement),App.Rotation(App.Vector(0,0,1),0))
-	if movement >= 500:
-		direction = -1
-	elif movement<=0:
-		direction = 1
-	movement = movement + 1 * direction
+ser.open()
+ser.isOpen()
 
+from PySide import QtCore
+directionMult = 1
 timer = QtCore.QTimer()
-timer.timeout.connect(MOVE)
-timer.start(1)
+timer.timeout.connect(MOVERAW)
+movement = 0
+startingPos = 0
+
+
+while startingPos + 100 * directionMult != movement:
+		print "Moving"
+	timer.stop()
+
+
+
+
+
+def MOVE(direction):
+	global movement
+	global timer
+	global directionMult
+	global startingPos
+	
+	startingPos = movement
+	if direction == "L":
+		directionMult = 1
+	elif direction == "R":
+		directionMult = -1
+	if ser.isOpen():
+		ser.write(direction)
+	timer.start(0.2)
+
+	
+
+
+
+def MOVERAW(): 
+	global movement
+	if (startingPos + 500 * directionMult == movement):
+		timer.stop()
+	else:
+		if not ((movement >= 500 and directionMult == 1) or (directionMult == -1 and movement <= 0)):
+			movement = movement + 1.8 * directionMult
+			FreeCAD.getDocument("block_combined").getObject("Pad001").Placement = App.Placement(App.Vector(0,0,movement),App.Rotation(App.Vector(0,0,1),0))
+		else:
+			timer.stop()
