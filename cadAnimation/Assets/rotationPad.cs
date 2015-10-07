@@ -2,14 +2,13 @@
 using System.Collections;
 using System.IO.Ports;
 
-public class rotationPad : MonoBehaviour {
+public class rotationPad : MovablePart {
 	public int standartRotationSpeed = 0;
 	public GameObject rotateAround;
-	private SerialPort serialPort;
 	private int rotationSpeed = 0;
 	// Use this for initialization
 	void Start () {
-		openAndCofigureSerialPort ();
+		base.Start ();
 	}
 	
 	// Update is called once per frame
@@ -25,7 +24,7 @@ public class rotationPad : MonoBehaviour {
 
 	void rotateAnticlockwise(){
 		sendSerialData ("L");
-		rotationSpeed = -1* standartRotationSpeed;
+		rotationSpeed = -1 * standartRotationSpeed;
 	}
 
 	void stop() {
@@ -33,25 +32,5 @@ public class rotationPad : MonoBehaviour {
 		rotationSpeed = 0;
 	}
 
-	void sendSerialData(string direction){
-		if (serialPort.IsOpen) {
-			serialPort.Write(direction);
-		}
-	}
-	
-	void openAndCofigureSerialPort(){
-		serialPort = new SerialPort ();
-		serialPort.PortName = "/dev/cu.usbmodem1421";
-		serialPort.DataBits = 8;
-		serialPort.Parity = Parity.None;
-		serialPort.StopBits = StopBits.One;
-		serialPort.BaudRate = 9600;
-		
-		try {
-			serialPort.Open ();
-			serialPort.DiscardOutBuffer ();
-			serialPort.DiscardInBuffer ();
-		} catch (System.Exception exc) {
-		}// end CATCH portion of TRY/CATCH block
-	}
+
 }
