@@ -7,7 +7,7 @@ public class MovablePart : MonoBehaviour {
 	private SerialPort serialPort = new System.IO.Ports.SerialPort();
 	// Use this for initialization
 	public void Start () {
-		//openAndCofigureSerialPort ();
+		openAndCofigureSerialPort ();
 	}
 	
 	// Update is called once per frame
