@@ -8,6 +8,9 @@ public class linearMovement : MovablePart {
 	private int moving;
 	private int movementSpeed;
 	public Slider serial;
+	private bool periodicMovement = false;
+	public Slider periodicStart;
+	public Slider periodicEnd;
 
 	// Use this for initialization
 	void Start () {
@@ -17,10 +20,22 @@ public class linearMovement : MovablePart {
 	// Update is called once per frame
 	void Update () {
 		setSpeed ((int)serial.value);
-		if (transform.position.z < 390 && transform.position.z > -35) {
+		if (periodicMovement) {
+			//Debug.Log("moving periodicly");
+			if(moving == -1 && transform.position.z < periodicStart.value){
+				moveRight();
+			} else if ( moving == 1 && transform.position.z > periodicEnd.value){
+				moveLeft();
+			}
 			transform.Translate (new Vector3 (0,
 			                                  0, 
 			                                  movementSpeed * Time.deltaTime));
+		} else {
+			if (transform.position.z < 390 && transform.position.z > -35) {
+				transform.Translate (new Vector3 (0,
+			                                  0, 
+			                                  movementSpeed * Time.deltaTime));
+			}
 		}
 	}
 
@@ -50,5 +65,10 @@ public class linearMovement : MovablePart {
 		} else if (moving < 0 ) {
 			moveLeft();
 		}
+	}
+
+	public void togglePeriodicMovement(){
+		periodicMovement = !periodicMovement;
+		moveRight ();
 	}
 }

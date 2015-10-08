@@ -9,6 +9,12 @@ public class rotationPad : MovablePart {
 	private int rotationSpeed = 0;
 	public Slider slider;
 	public int rotating;
+	public int limitAClockwise = 320;
+	public int limitClockwise = 210;
+	private bool periodicMovement = false;
+	public Slider periodicStart;
+	public Slider periodicEnd;
+
 	// Use this for initialization
 	void Start () {
 		base.Start ();
@@ -17,8 +23,29 @@ public class rotationPad : MovablePart {
 	// Update is called once per frame
 	void Update () {
 		setSpeed ((int)slider.value);
-		transform.RotateAround (rotateAround.transform.position, new Vector3 (0, 1, 0), rotationSpeed * Time.deltaTime);
 
+		if (periodicMovement) {
+
+			if (rotating == -1 && 
+			    transform.rotation.eulerAngles.z < sliderToRotation(periodicStart.value) + 10 && 
+			    transform.rotation.eulerAngles.z > sliderToRotation(periodicEnd.value)) {
+				rotateClockwise ();
+			} else if (rotating == 1 && 
+			           transform.rotation.eulerAngles.z > sliderToRotation(periodicEnd.value) && 
+			           transform.rotation.eulerAngles.z < sliderToRotation(periodicStart.value) - 10) {
+				rotateAnticlockwise ();
+			}
+		} else {
+
+
+			if (rotating == 1 && transform.rotation.eulerAngles.z > limitClockwise && transform.rotation.eulerAngles.z < limitAClockwise - 10)
+				stop ();
+			if (rotating == -1 && transform.rotation.eulerAngles.z > limitClockwise + 10 && transform.rotation.eulerAngles.z < limitAClockwise)
+				stop ();
+		}
+			//if(rotating == -1 && transform.rotation.eulerAngles.z
+			transform.RotateAround (rotateAround.transform.position, new Vector3 (0, 0, 1), rotationSpeed * Time.deltaTime);
+		
 	}
 
 	void rotateClockwise(){
@@ -48,5 +75,20 @@ public class rotationPad : MovablePart {
 		}
 	}
 
+	public void togglePeriodicMovement(){
+		periodicMovement = !periodicMovement;
+		if (periodicMovement) {
+			rotateClockwise ();
+		} else {
+			stop();
+		}
+	}
 
+	float sliderToRotation ( float sliderValue){
+		if (sliderValue < 35) {
+			return 360 - (35-sliderValue);
+		} else {
+			return sliderValue -35;
+		}
+	}
 }
