@@ -20,7 +20,7 @@ public class rotationPad : MovablePart {
 
 	// Use this for initialization
 	void Start () {
-		base.Start ();
+		//base.Start ();
 		transform.RotateAround (rotateAround.transform.position, new Vector3 (0, 0, 1), 90);
 	}
 	

@@ -56,12 +56,15 @@ public class linearMovement : MovablePart {
 	}
 
 	void moveLeft(){
+		Debug.Log("L" + convertMovementSpeedToMotorSpeed(-1 * standartMovementSpeed));
 		sendSerialData ("L" + convertMovementSpeedToMotorSpeed(-1 * standartMovementSpeed));
 		movementSpeed = -1 * standartMovementSpeed;
 		moving = -1;
 	}
 
 	void moveRight(){
+		
+		Debug.Log("L" + convertMovementSpeedToMotorSpeed( standartMovementSpeed));
 		sendSerialData ("L" + convertMovementSpeedToMotorSpeed(standartMovementSpeed));
 		movementSpeed = standartMovementSpeed;
 		moving = 1;

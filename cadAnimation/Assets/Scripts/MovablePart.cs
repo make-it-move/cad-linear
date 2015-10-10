@@ -3,8 +3,8 @@ using System.Collections;
 using System.IO.Ports;
 
 public class MovablePart : MonoBehaviour {
-	public static string SerialPort = "/dev/cu.usbmodem1411";
-	private SerialPort serialPort = new System.IO.Ports.SerialPort();
+	public static string SerialPort = "COM3";
+	private static SerialPort serialPort = new System.IO.Ports.SerialPort();
 
 	// Use this for initialization
 	public void Start () {
@@ -22,7 +22,7 @@ public class MovablePart : MonoBehaviour {
 		}
 	}
 	
-	void openAndCofigureSerialPort(){
+	static void openAndCofigureSerialPort(){
 		serialPort = new SerialPort ();
 		serialPort.PortName = MovablePart.SerialPort;
 		serialPort.DataBits = 8;
