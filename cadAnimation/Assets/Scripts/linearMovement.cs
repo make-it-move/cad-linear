@@ -5,12 +5,18 @@ using System.IO.Ports;
 
 public class linearMovement : MovablePart {
 	public int standartMovementSpeed = 0;
-	private int moving;
+	private int moving = 0;
 	private int movementSpeed;
-	public Slider serial;
+	public Slider speedSlider;
 	private bool periodicMovement = false;
 	public Slider periodicStart;
 	public Slider periodicEnd;
+
+	private bool leftStep = false;
+	private bool rightStep = false;
+	public float stepLength = 10.0f;
+	public float stepStartingPoint;
+	public mainController master;
 
 	// Use this for initialization
 	void Start () {
@@ -19,9 +25,19 @@ public class linearMovement : MovablePart {
 	
 	// Update is called once per frame
 	void Update () {
-		setSpeed ((int)serial.value);
-		if (periodicMovement) {
-			//Debug.Log("moving periodicly");
+		if (standartMovementSpeed != (int) speedSlider.value) {
+			setSpeed ((int)speedSlider.value);
+		}
+
+		if (leftStep && stepStartingPoint - transform.position.z > stepLength) {
+			leftStep = false;
+			master.readyForNextMoveLinear = true;
+			stop ();
+		} else if (rightStep && transform.position.z - stepStartingPoint > stepLength) {
+			rightStep = false;
+			master.readyForNextMoveLinear = true;
+			stop();
+		} else if (periodicMovement) {
 			if(moving == -1 && transform.position.z < periodicStart.value){
 				moveRight();
 			} else if ( moving == 1 && transform.position.z > periodicEnd.value){
@@ -40,22 +56,39 @@ public class linearMovement : MovablePart {
 	}
 
 	void moveLeft(){
-		sendSerialData ("L");
+		sendSerialData ("L" + convertMovementSpeedToMotorSpeed(-1 * standartMovementSpeed));
 		movementSpeed = -1 * standartMovementSpeed;
 		moving = -1;
 	}
 
 	void moveRight(){
-		sendSerialData ("R");
+		sendSerialData ("L" + convertMovementSpeedToMotorSpeed(standartMovementSpeed));
 		movementSpeed = standartMovementSpeed;
 		moving = 1;
-
 	}
 
 	void stop() {
-		sendSerialData ("S");
+		sendSerialData ("L090");
 		movementSpeed = 0;
 		moving = 0;
+	}
+
+	public void moveOneStepLeftStart(){
+		master.readyForNextMoveLinear = false;
+		stepStartingPoint = transform.position.z;
+		leftStep = true;
+		rightStep = false;
+		periodicMovement = false;
+		moveLeft ();
+	}
+
+	public void moveOneStepRightStart(){
+		master.readyForNextMoveLinear = false;
+		stepStartingPoint = transform.position.z;
+		rightStep = true;
+		leftStep = false;
+		periodicMovement = false;
+		moveRight ();
 	}
 
 	public void setSpeed(int value){
@@ -70,5 +103,15 @@ public class linearMovement : MovablePart {
 	public void togglePeriodicMovement(){
 		periodicMovement = !periodicMovement;
 		moveRight ();
+	}
+	
+	string convertMovementSpeedToMotorSpeed (int speed) {
+		int max = (int)speedSlider.maxValue;
+		int motorSpeed = (int) ((speed + max) * 180.0 / (max+max));
+		string speedString = motorSpeed.ToString ();
+		while (speedString.Length < 3) {
+			speedString = "0" + speedString;
+		}
+		return speedString;
 	}
 }

@@ -3,8 +3,9 @@ using System.Collections;
 using System.IO.Ports;
 
 public class MovablePart : MonoBehaviour {
-	public static string SerialPort = "/dev/cu.usbmodem1421";
+	public static string SerialPort = "/dev/cu.usbmodem1411";
 	private SerialPort serialPort = new System.IO.Ports.SerialPort();
+
 	// Use this for initialization
 	public void Start () {
 		openAndCofigureSerialPort ();

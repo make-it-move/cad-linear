@@ -7,63 +7,82 @@ public class rotationPad : MovablePart {
 	public int standartRotationSpeed = 0;
 	public GameObject rotateAround;
 	private int rotationSpeed = 0;
-	public Slider slider;
-	public int rotating;
-	public int limitAClockwise = 320;
-	public int limitClockwise = 210;
+	public Slider speedSlider;
+	private int rotating = 0;
+	public int limitAClockwise = 30;
+	public int limitClockwise = 330;
 	private bool periodicMovement = false;
+	private bool hitOnce = false;
+	private bool hit = false;
 	public Slider periodicStart;
 	public Slider periodicEnd;
+	public mainController master;
 
 	// Use this for initialization
 	void Start () {
 		base.Start ();
+		transform.RotateAround (rotateAround.transform.position, new Vector3 (0, 0, 1), 90);
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		setSpeed ((int)slider.value);
+		if (standartRotationSpeed != (int) speedSlider.value) {
+			setSpeed ((int)speedSlider.value);
+		}
+		if (hitOnce) {
+			if(!hit && rotating != -1){
+				rotateAnticlockwise();
+			} else if (hit && rotating == 1 && transform.localRotation.eulerAngles.z > sliderToRotation(periodicEnd.value)){
+				stop();
+				master.readyForNextMoveRotation = true;
+				hitOnce = false;
+				hit = false;
+			} else if (rotating == -1 && 
+			           transform.localRotation.eulerAngles.z < sliderToRotation(periodicStart.value)){
+				hit = true;
+				rotateClockwise();
+			}
 
-		if (periodicMovement) {
-
+		} else if (periodicMovement) {
 			if (rotating == -1 && 
-			    transform.rotation.eulerAngles.z < sliderToRotation(periodicStart.value) + 10 && 
-			    transform.rotation.eulerAngles.z > sliderToRotation(periodicEnd.value)) {
+			    transform.localRotation.eulerAngles.z < sliderToRotation(periodicStart.value)) {
 				rotateClockwise ();
 			} else if (rotating == 1 && 
-			           transform.rotation.eulerAngles.z > sliderToRotation(periodicEnd.value) && 
-			           transform.rotation.eulerAngles.z < sliderToRotation(periodicStart.value) - 10) {
+			           transform.localRotation.eulerAngles.z > sliderToRotation(periodicEnd.value)) {
 				rotateAnticlockwise ();
 			}
 		} else {
-
-
-			if (rotating == 1 && transform.rotation.eulerAngles.z > limitClockwise && transform.rotation.eulerAngles.z < limitAClockwise - 10)
+			if (rotating == 1 && transform.localRotation.eulerAngles.z > limitClockwise)
 				stop ();
-			if (rotating == -1 && transform.rotation.eulerAngles.z > limitClockwise + 10 && transform.rotation.eulerAngles.z < limitAClockwise)
+			if (rotating == -1 && transform.localRotation.eulerAngles.z < limitAClockwise)
 				stop ();
 		}
-			//if(rotating == -1 && transform.rotation.eulerAngles.z
-			transform.RotateAround (rotateAround.transform.position, new Vector3 (0, 0, 1), rotationSpeed * Time.deltaTime);
+		transform.RotateAround (rotateAround.transform.position, new Vector3 (0, 0, 1), rotationSpeed * Time.deltaTime);
 		
 	}
 
 	void rotateClockwise(){
-		sendSerialData ("r");
+		sendSerialData ("R" + convertMovementSpeedToMotorSpeed(standartRotationSpeed));
 		rotationSpeed = standartRotationSpeed;
 		rotating = 1;
 	}
 
 	void rotateAnticlockwise(){
-		sendSerialData ("l");
+		sendSerialData ("R" + convertMovementSpeedToMotorSpeed(-1 * standartRotationSpeed));
 		rotationSpeed = -1 * standartRotationSpeed;
 		rotating = -1;
 	}
 
 	void stop() {
-		sendSerialData ("s");
+		sendSerialData ("R090");
 		rotationSpeed = 0;
 		rotating = 0;
+	}
+
+	public void hitOnceStart(){
+		master.readyForNextMoveRotation = false;
+		hitOnce = true;
+		periodicMovement = false;
 	}
 
 	public void setSpeed(int value){
@@ -78,6 +97,7 @@ public class rotationPad : MovablePart {
 	public void togglePeriodicMovement(){
 		periodicMovement = !periodicMovement;
 		if (periodicMovement) {
+			hitOnce = false;
 			rotateClockwise ();
 		} else {
 			stop();
@@ -85,10 +105,21 @@ public class rotationPad : MovablePart {
 	}
 
 	float sliderToRotation ( float sliderValue){
-		if (sliderValue < 35) {
+		return sliderValue;
+		/*if (sliderValue < 35) {
 			return 360 - (35-sliderValue);
 		} else {
 			return sliderValue -35;
+		}*/
+	}
+
+	string convertMovementSpeedToMotorSpeed (int speed) {
+		int max = (int)speedSlider.maxValue;
+		int motorSpeed = (int) ((speed + max) * 180.0 / (max+max));
+		string speedString = motorSpeed.ToString ();
+		while (speedString.Length < 3) {
+			speedString = "0" + speedString;
 		}
+		return speedString;
 	}
 }
