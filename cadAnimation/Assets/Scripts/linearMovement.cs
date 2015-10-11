@@ -32,11 +32,11 @@ public class linearMovement : MovablePart {
 		if (leftStep && stepStartingPoint - transform.position.z > stepLength) {
 			leftStep = false;
 			master.readyForNextMoveLinear = true;
-			stop ();
+			stop (false);
 		} else if (rightStep && transform.position.z - stepStartingPoint > stepLength) {
 			rightStep = false;
 			master.readyForNextMoveLinear = true;
-			stop();
+			stop(false);
 		} else if (periodicMovement) {
 			if(moving == -1 && transform.position.z < periodicStart.value){
 				moveRight();
@@ -46,32 +46,51 @@ public class linearMovement : MovablePart {
 			transform.Translate (new Vector3 (0,
 			                                  0, 
 			                                  movementSpeed * Time.deltaTime));
-		} else {
-			if (transform.position.z < 390 && transform.position.z > -35) {
-				transform.Translate (new Vector3 (0,
-			                                  0, 
-			                                  movementSpeed * Time.deltaTime));
+		} else if (moving != 0){
+			if ((moving == 1 && transform.position.z < 370) || 
+			    (moving == -1 && transform.position.z > -35)) {
+				transform.Translate (new Vector3 (0, 
+				                                  0,
+				                                  movementSpeed * Time.deltaTime));
+			} else {
+				stop(false);
+				master.readyForNextMoveLinear = true;
 			}
 		}
 	}
 
 	void moveLeft(){
-		Debug.Log("L" + convertMovementSpeedToMotorSpeed(-1 * standartMovementSpeed));
-		sendSerialData ("L" + convertMovementSpeedToMotorSpeed(-1 * standartMovementSpeed));
+		moveLeft (true);
+	}
+
+	void moveLeft(bool sendSerial){
+		if (sendSerial) {
+			sendSerialData ("L" + convertMovementSpeedToMotorSpeed (-1 * standartMovementSpeed));
+		}
 		movementSpeed = -1 * standartMovementSpeed;
 		moving = -1;
 	}
 
 	void moveRight(){
-		
-		Debug.Log("L" + convertMovementSpeedToMotorSpeed( standartMovementSpeed));
-		sendSerialData ("L" + convertMovementSpeedToMotorSpeed(standartMovementSpeed));
+		moveRight (true);
+	}
+
+	void moveRight(bool sendSerial){
+		if (sendSerial) {
+			sendSerialData ("L" + convertMovementSpeedToMotorSpeed (standartMovementSpeed));
+		}
 		movementSpeed = standartMovementSpeed;
 		moving = 1;
 	}
 
-	void stop() {
-		sendSerialData ("L090");
+	void stop(){
+		stop (true);
+	}
+
+	void stop(bool sendSerial) {
+		if (sendSerial) {
+			sendSerialData ("L090");
+		}
 		movementSpeed = 0;
 		moving = 0;
 	}
@@ -82,7 +101,7 @@ public class linearMovement : MovablePart {
 		leftStep = true;
 		rightStep = false;
 		periodicMovement = false;
-		moveLeft ();
+		moveLeft (false);
 	}
 
 	public void moveOneStepRightStart(){
@@ -91,7 +110,15 @@ public class linearMovement : MovablePart {
 		rightStep = true;
 		leftStep = false;
 		periodicMovement = false;
-		moveRight ();
+		moveRight (false);
+	}
+
+	public void moveFullyLeft(){
+		master.readyForNextMoveLinear = false;
+		rightStep = false;
+		leftStep = false;
+		periodicMovement = false;
+		moveLeft ();
 	}
 
 	public void setSpeed(int value){

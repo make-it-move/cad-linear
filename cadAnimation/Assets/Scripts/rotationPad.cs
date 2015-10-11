@@ -31,16 +31,16 @@ public class rotationPad : MovablePart {
 		}
 		if (hitOnce) {
 			if(!hit && rotating != -1){
-				rotateAnticlockwise();
+				rotateAnticlockwise(false);
 			} else if (hit && rotating == 1 && transform.localRotation.eulerAngles.z > sliderToRotation(periodicEnd.value)){
-				stop();
+				stop(false);
 				master.readyForNextMoveRotation = true;
 				hitOnce = false;
 				hit = false;
 			} else if (rotating == -1 && 
 			           transform.localRotation.eulerAngles.z < sliderToRotation(periodicStart.value)){
 				hit = true;
-				rotateClockwise();
+				rotateClockwise(false);
 			}
 
 		} else if (periodicMovement) {
@@ -62,19 +62,37 @@ public class rotationPad : MovablePart {
 	}
 
 	void rotateClockwise(){
-		sendSerialData ("R" + convertMovementSpeedToMotorSpeed(standartRotationSpeed));
+		rotateClockwise (true);
+	}
+
+	void rotateClockwise(bool sendSerial){
+		if (sendSerial) {
+			sendSerialData ("R" + convertMovementSpeedToMotorSpeed (standartRotationSpeed));
+		}
 		rotationSpeed = standartRotationSpeed;
 		rotating = 1;
 	}
 
 	void rotateAnticlockwise(){
-		sendSerialData ("R" + convertMovementSpeedToMotorSpeed(-1 * standartRotationSpeed));
+		rotateAnticlockwise (true);
+	}
+
+	void rotateAnticlockwise(bool sendSerial){
+		if (sendSerial) {
+			sendSerialData ("R" + convertMovementSpeedToMotorSpeed (-1 * standartRotationSpeed));
+		}
 		rotationSpeed = -1 * standartRotationSpeed;
 		rotating = -1;
 	}
 
-	void stop() {
-		sendSerialData ("R090");
+	void stop(){
+		stop (true);
+	}
+
+	void stop(bool sendSerial) {
+		if (sendSerial) {
+			sendSerialData ("R090");
+		}
 		rotationSpeed = 0;
 		rotating = 0;
 	}
@@ -106,11 +124,6 @@ public class rotationPad : MovablePart {
 
 	float sliderToRotation ( float sliderValue){
 		return sliderValue;
-		/*if (sliderValue < 35) {
-			return 360 - (35-sliderValue);
-		} else {
-			return sliderValue -35;
-		}*/
 	}
 
 	string convertMovementSpeedToMotorSpeed (int speed) {

@@ -10,7 +10,8 @@ public class mainController : MonoBehaviour {
 	public int stateCounter;
 	public bool readyForNextMoveLinear = true;
 	public bool readyForNextMoveRotation = true;
-	public bool runMusic = false;
+	public bool runSong1 = false;
+	public bool runSong2 = false;
 
 	// Use this for initialization
 	void Start () {
@@ -19,19 +20,43 @@ public class mainController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (runMusic) {
+		if (runSong1) {
 
-			/*if (readyToMove (new int[] { 1, 2, 3, 4, 5, 7, 15, 17, 22, 24, 28, 30, 32, 35, 45, 47, 53, 54, 55 })) {
+			if (readyToMove (new int[] { 
+				1, 2, 3, 4, 5, 
+				7, 15, 17, 23, 25, 
+				29, 31, 43, 45, 51,
+			  	52, 53})) {
 				linear.moveOneStepRightStart ();
-			} else if (readyToMove (new int[] { 9, 11, 13, 19, 20, 26, 37, 39, 41, 43, 49, 50, 51, 57,58,60 })) {
+			} else if (readyToMove (new int[] { 
+				9, 11, 13, 19, 20, 
+				21, 27, 35, 37, 39,
+				41, 47, 48, 49, 54,
+				56, 58, 59})) {
 				linear.moveOneStepLeftStart ();
-			} else if (readyToMove (new int[] {6,8,10,12,14,16,18,21,23,25,27,29,31,33,34,36,38,40,42,44,46,48,52,56,59,61})) {
-				//rotation.hitOnceStart ();
-			}*/
-			if(readyToMove(new int[] {1})){
-				linear.moveOneStepLeftStart();
-			} else if(readyToMove(new int[] {2})){
-				linear.moveOneStepRightStart();
+			} else if (readyToMove (new int[] {
+				6, 8, 10, 12, 14,
+				16, 18, 22, 24, 26,
+				28, 30, 32, 34, 36, 
+				38, 40, 42, 44, 46, 
+				49, 54, 57, 60, 33})) {
+				rotation.hitOnceStart ();
+			} //33Delay
+
+		} else if (runSong2) {
+
+			if (readyToMove (new int[] {
+				2, 4, 6, 8, 12, 19
+				})) {
+				linear.moveOneStepRightStart ();
+			} else if (readyToMove (new int[] { 
+				17
+				})) {
+				linear.moveOneStepLeftStart ();
+			} else if (readyToMove (new int[] {
+				1, 3, 5, 7, 9, 11, 13, 14, 15, 16, 18, 10
+				})) {
+				rotation.hitOnceStart ();
 			}
 		}
 	}
@@ -48,9 +73,20 @@ public class mainController : MonoBehaviour {
 		return false;
 	}
 
-	public void startMusic(){
-		runMusic = true;
+	public void startSong1(){
+		linear.sendSerialData ("P100");
+		runSong1 = true;
+		runSong2 = false;
 		stateCounter = 1;
+		linear.moveFullyLeft ();
+	}
+
+	public void startSong2(){
+		linear.sendSerialData ("P200");
+		runSong1 = false;
+		runSong2 = true;
+		stateCounter = 1;
+		linear.moveFullyLeft ();
 	}
 
 	void toogleActivityOfComponents(GameObject[] components, bool active){

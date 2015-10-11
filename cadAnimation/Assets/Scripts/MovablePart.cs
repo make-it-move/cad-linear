@@ -3,7 +3,10 @@ using System.Collections;
 using System.IO.Ports;
 
 public class MovablePart : MonoBehaviour {
-	public static string SerialPort = "COM3";
+	//Windows Config
+	//public static string SerialPort = "COM3";
+	//Mac Config
+	public static string SerialPort = "/dev/cu.usbmodem1411";
 	private static SerialPort serialPort = new System.IO.Ports.SerialPort();
 
 	// Use this for initialization
